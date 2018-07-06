@@ -57,13 +57,47 @@ def record(name, pie, index):
 #     n = pie.get_device_count
 #     for i in range(0, n):
 #         if pie.get_device_info_by_host_api_device_index(0, i).get('name') = 
-    
+
+
+
+class CP2615():
+    def __init__(self, pie):
+        self.chip = None
+        self.pie = pie
+
+    def Open(self):
+        self.chip = self.pie.open(rate = 44100,
+                		            channels = 2,
+                		            format = 16,
+                		            input = True,
+                		            output = True,
+                		            input_device_index = InputIdx,
+                		            output_device_index = OutputIdx)
+
+    def Close(self):
+        if (self.chip != None):
+            self.chip.close()
+            self.chip = None
+
+    def Get_IO_Indices(self):
+        pie = self.pie
+        for n in range( pie.get_device_count() ):
+            if (pie.get_device_info_by_index(n)['name']=='Line (CP2615 Digital Audio Brid'):
+                break
+        InputIdx = n
+        for n in range( pie.get_device_count() ):
+            if (pie.get_device_info_by_index(n)['name']=='Headphones (CP2615 Digital Audi'):
+                break
+        OutputIdx = n
+        return (InputIdx, OutputIdx)
     
                
 #main
 pie = pyaudio.PyAudio()
 #playDirectory('waves', pie, 2)
 
-record("recordings/new.wav", pie, 2)
-playDirectory('recordings', pie, 2)
+cp2615 = CP2615(pie)
+(InputIdx, OutputIdx) = cp2615.Get_IO_Indices()
+record("recordings/new.wav", pie, InputIdx)
+playDirectory('recordings', pie, OutputIdx)
 
